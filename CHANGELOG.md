@@ -1,3 +1,8 @@
+## 0.0.5
+
+- Changed the license for this and future versions from MIT to the Apache
+  License 2.0 and added the package NOTICE file.
+
 ## 0.0.4
 
 - Migrated all package Provider declarations to `riverpod_generator` while

@@ -42,7 +42,7 @@ Add the dependency:
 
 ```yaml
 dependencies:
-  app_factory_firebase: ^0.0.3
+  app_factory_firebase: ^0.0.5
 ```
 
 Then run:
@@ -577,3 +577,8 @@ running.
 Prefer `appAnalyticsProvider`, `appCrashReporterProvider`, and
 `appPerformanceTracerProvider`. That keeps business code testable and makes it
 easy to replace implementations in tests.
+
+## License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) and
+[NOTICE](NOTICE).
