@@ -846,7 +846,7 @@ final class CrashlyticsGitShaInitializerProvider
     : super(
         from: null,
         argument: null,
-        retry: null,
+        retry: _noRetry,
         name: r'crashlyticsGitShaInitializerProvider',
         isAutoDispose: false,
         dependencies: null,
@@ -868,7 +868,7 @@ final class CrashlyticsGitShaInitializerProvider
 }
 
 String _$crashlyticsGitShaInitializerHash() =>
-    r'cd04b660e250e914012a948d61236d3eeaff6060';
+    r'cc6363448fbd6a9dd31aed7dd88a6e9404d1f554';
 
 @ProviderFor(analyticsInitializer)
 final analyticsInitializerProvider = AnalyticsInitializerProvider._();

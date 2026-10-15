@@ -141,6 +141,35 @@ void main() {
     },
   );
 
+  test(
+    'Crashlytics Git SHA initializer fails fast without retrying writes',
+    () async {
+      final _ThrowingCustomKeyWriter crashReporter =
+          _ThrowingCustomKeyWriter();
+      final ProviderContainer container = ProviderContainer(
+        overrides: [
+          appFactoryFirebaseConfigProvider.overrideWithValue(
+            const AppFactoryFirebaseConfig(options: options, gitSha: 'abc123'),
+          ),
+          appCrashReporterProvider.overrideWithValue(crashReporter),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      // Retries are disabled: the write failure must complete the future
+      // instead of leaving it pending and blocking startup.
+      await expectLater(
+        container.read(crashlyticsGitShaInitializerProvider.future),
+        throwsA(isA<StateError>()),
+      );
+
+      // Past Riverpod's initial 200ms default retry window, the failed write
+      // must not have been attempted again.
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      expect(crashReporter.setCustomKeyCalls, 1);
+    },
+  );
+
   test('sanitizes Firebase analytics parameters', () {
     final Map<String, Object>? parameters = sanitizeFirebaseParameters(
       <String, Object?>{
@@ -1062,6 +1091,30 @@ class _CustomKeylessCrashReporter implements AppCrashReporter {
 
   @override
   Future<void> setUserIdentifier(String? userId) async {}
+}
+
+class _ThrowingCustomKeyWriter
+    implements AppCrashReporter, AppCrashCustomKeyWriter {
+  int setCustomKeyCalls = 0;
+
+  @override
+  void log(String message) {}
+
+  @override
+  Future<void> recordError(
+    Object error,
+    StackTrace stackTrace, {
+    bool fatal = false,
+  }) async {}
+
+  @override
+  Future<void> setUserIdentifier(String? userId) async {}
+
+  @override
+  Future<void> setCustomKey(String key, Object value) async {
+    setCustomKeyCalls++;
+    throw StateError('crashlytics unavailable');
+  }
 }
 
 class _ThrowingIdentityAnalytics extends FakeAppAnalytics {
