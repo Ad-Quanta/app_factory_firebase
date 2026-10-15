@@ -152,7 +152,16 @@ Future<bool> crashlyticsCollectionInitializer(Ref ref) async {
   return enabled;
 }
 
-@Riverpod(keepAlive: true)
+/// Disables Riverpod's default unlimited retry for startup initializers.
+///
+/// Startup initializers are awaited once via `container.read(...future)`,
+/// which leaves no active listener. With the default retry a failed build
+/// would keep the future pending indefinitely, blocking app startup before
+/// `AppFactoryFirebase.initialize` can record the failure. Returning `null`
+/// makes the failure complete immediately so startup continues fail-open.
+Duration? _noRetry(int retryCount, Object error) => null;
+
+@Riverpod(keepAlive: true, retry: _noRetry)
 Future<bool> crashlyticsGitShaInitializer(Ref ref) async {
   final AppFactoryFirebaseConfig config = ref.watch(
     appFactoryFirebaseConfigProvider,
