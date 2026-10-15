@@ -113,10 +113,12 @@ class FakeCrashError {
   final bool fatal;
 }
 
-class FakeAppCrashReporter implements AppCrashReporter {
+class FakeAppCrashReporter
+    implements AppCrashReporter, AppCrashCustomKeyWriter {
   final List<String> logs = <String>[];
   final List<FakeCrashError> errors = <FakeCrashError>[];
   final List<String?> userIdentifiers = <String?>[];
+  final Map<String, Object> customKeys = <String, Object>{};
 
   @override
   void log(String message) {
@@ -137,6 +139,11 @@ class FakeAppCrashReporter implements AppCrashReporter {
   @override
   Future<void> setUserIdentifier(String? userId) async {
     userIdentifiers.add(userId);
+  }
+
+  @override
+  Future<void> setCustomKey(String key, Object value) async {
+    customKeys[key] = value;
   }
 }
 

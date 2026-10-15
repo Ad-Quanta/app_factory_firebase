@@ -12,6 +12,7 @@ class AppFactoryFirebaseConfig {
     this.analyticsCollectionEnabled,
     this.crashlyticsCollectionEnabled,
     this.performanceCollectionEnabled,
+    this.gitSha = const String.fromEnvironment('APP_GIT_SHA', defaultValue: ''),
     this.defaultEventParameters = const <String, Object?>{},
     this.contextProperties = const <String, String>{},
     this.debugLogInitializeResult = false,
@@ -26,6 +27,12 @@ class AppFactoryFirebaseConfig {
   final bool? analyticsCollectionEnabled;
   final bool? crashlyticsCollectionEnabled;
   final bool? performanceCollectionEnabled;
+
+  /// The source commit used to build the app.
+  ///
+  /// When omitted, this is read from the `APP_GIT_SHA` Dart define so CI can
+  /// inject the value without app-specific runtime code.
+  final String gitSha;
   final Map<String, Object?> defaultEventParameters;
   final Map<String, String> contextProperties;
   final bool debugLogInitializeResult;
@@ -55,6 +62,12 @@ class AppFactoryFirebaseConfig {
     );
   }
 
+  /// The normalized [gitSha], or `null` when no commit was injected.
+  String? get resolvedGitSha {
+    final String trimmed = gitSha.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
   bool _resolveCollectionEnabled({
     required bool? explicitValue,
     required bool isReleaseMode,
@@ -77,6 +90,7 @@ class AppFactoryFirebaseInitializeResult {
     required this.crashlyticsCollectionEnabled,
     required this.performanceCollectionEnabled,
     required this.flutterErrorsCaptured,
+    this.crashlyticsGitShaAttached = false,
     this.initializationErrors = const <String>[],
   });
 
@@ -89,6 +103,7 @@ class AppFactoryFirebaseInitializeResult {
   final bool crashlyticsCollectionEnabled;
   final bool performanceCollectionEnabled;
   final bool flutterErrorsCaptured;
+  final bool crashlyticsGitShaAttached;
   final List<String> initializationErrors;
 
   @override
@@ -103,6 +118,7 @@ class AppFactoryFirebaseInitializeResult {
         'crashlyticsCollectionEnabled: $crashlyticsCollectionEnabled, '
         'performanceCollectionEnabled: $performanceCollectionEnabled, '
         'flutterErrorsCaptured: $flutterErrorsCaptured, '
+        'crashlyticsGitShaAttached: $crashlyticsGitShaAttached, '
         'initializationErrors: $initializationErrors'
         ')';
   }

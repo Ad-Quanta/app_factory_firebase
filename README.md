@@ -13,6 +13,7 @@ Firebase Analytics, Crashlytics, and Performance Monitoring.
 - Configurable Analytics, Crashlytics, and Performance collection switches
 - Release-only collection defaults to avoid polluting production dashboards
 - Flutter and Dart error capture through Crashlytics
+- Build Git SHA attribution on Crashlytics events
 - Analytics event logging, screen tracking, user properties, and context properties
 - Firebase-safe Analytics parameter sanitization
 - Performance traces with attributes and metrics
@@ -340,6 +341,46 @@ need another monitoring SDK or custom global error handling must set
 `captureFlutterErrors: false` and own the forwarding to Crashlytics explicitly.
 Flutter framework errors are still presented locally in debug and profile
 builds, while Crashlytics upload failures remain fail-open.
+
+### Build Git SHA Attribution
+
+The package can attach the source commit used to build the app to the crash
+reports and non-fatal errors recorded after initialization, as the `git_sha`
+custom key. Pass the commit at build time with the `APP_GIT_SHA` Dart define;
+the package reads it automatically:
+
+```bash
+flutter build appbundle --release \
+  --dart-define=APP_GIT_SHA="$(git rev-parse HEAD)"
+```
+
+CI should inject its commit variable instead of running Git in the build
+environment, for example GitHub Actions:
+
+```bash
+flutter build appbundle --release \
+  --dart-define=APP_GIT_SHA="$GITHUB_SHA"
+```
+
+You can also set it explicitly in Dart when a build system already provides
+its own metadata:
+
+```dart
+AppFactoryFirebaseConfig(
+  options: DefaultFirebaseOptions.currentPlatform,
+  gitSha: 'a1b2c3d4',
+)
+```
+
+If no value is provided, initialization continues normally and the custom key
+is omitted. `AppFactoryFirebaseInitializeResult.crashlyticsGitShaAttached`
+reports whether the key was written. The Git SHA identifies the exact source
+commit; native symbol files such as iOS dSYMs and Android mapping files are
+still required for symbolicated native stack traces.
+
+Apps that override `appCrashReporterProvider` with their own reporter only get
+the custom key when that reporter also implements `AppCrashCustomKeyWriter`;
+otherwise the attribution is skipped and initialization continues.
 
 For errors you catch manually:
 

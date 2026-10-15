@@ -1,3 +1,14 @@
+## 0.0.6
+
+- Added build Git SHA attribution that reports the source commit as the
+  Crashlytics `git_sha` custom key.
+- Added `AppFactoryFirebaseConfig.gitSha`, defaulting to the `APP_GIT_SHA` Dart
+  define so build systems can inject the commit without app-specific code.
+- Added `AppCrashCustomKeyWriter` for reporters that support Crashlytics custom
+  keys, keeping existing `AppCrashReporter` implementations source compatible.
+- Added `AppFactoryFirebaseInitializeResult.crashlyticsGitShaAttached` to report
+  whether the custom key was written.
+
 ## 0.0.5
 
 - Changed the license for this and future versions from MIT to the Apache
