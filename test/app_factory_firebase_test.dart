@@ -59,6 +59,88 @@ void main() {
     );
   });
 
+  test('normalizes the configured git SHA', () {
+    expect(
+      const AppFactoryFirebaseConfig(
+        options: options,
+        gitSha: '  abc123  ',
+      ).resolvedGitSha,
+      'abc123',
+    );
+    expect(
+      const AppFactoryFirebaseConfig(
+        options: options,
+        gitSha: '   ',
+      ).resolvedGitSha,
+      isNull,
+    );
+  });
+
+  test('Crashlytics Git SHA initializer writes a trimmed custom key', () async {
+    final FakeAppCrashReporter crashReporter = FakeAppCrashReporter();
+    final ProviderContainer container = ProviderContainer(
+      overrides: [
+        appFactoryFirebaseConfigProvider.overrideWithValue(
+          const AppFactoryFirebaseConfig(
+            options: options,
+            gitSha: '  abc123  ',
+          ),
+        ),
+        appCrashReporterProvider.overrideWithValue(crashReporter),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    expect(
+      await container.read(crashlyticsGitShaInitializerProvider.future),
+      true,
+    );
+    expect(crashReporter.customKeys, <String, Object>{
+      appFactoryFirebaseGitShaKey: 'abc123',
+    });
+  });
+
+  test('Crashlytics Git SHA initializer skips an omitted SHA', () async {
+    final FakeAppCrashReporter crashReporter = FakeAppCrashReporter();
+    final ProviderContainer container = ProviderContainer(
+      overrides: [
+        appFactoryFirebaseConfigProvider.overrideWithValue(
+          const AppFactoryFirebaseConfig(options: options, gitSha: ''),
+        ),
+        appCrashReporterProvider.overrideWithValue(crashReporter),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    expect(
+      await container.read(crashlyticsGitShaInitializerProvider.future),
+      false,
+    );
+    expect(crashReporter.customKeys, isEmpty);
+  });
+
+  test(
+    'Crashlytics Git SHA initializer skips reporters without custom keys',
+    () async {
+      final ProviderContainer container = ProviderContainer(
+        overrides: [
+          appFactoryFirebaseConfigProvider.overrideWithValue(
+            const AppFactoryFirebaseConfig(options: options, gitSha: 'abc123'),
+          ),
+          appCrashReporterProvider.overrideWithValue(
+            _CustomKeylessCrashReporter(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      expect(
+        await container.read(crashlyticsGitShaInitializerProvider.future),
+        false,
+      );
+    },
+  );
+
   test('sanitizes Firebase analytics parameters', () {
     final Map<String, Object>? parameters = sanitizeFirebaseParameters(
       <String, Object?>{
@@ -962,6 +1044,21 @@ class _ThrowingCrashReporter implements AppCrashReporter {
     recordErrorCalls++;
     return Future<void>.error(StateError('crash upload failed'));
   }
+
+  @override
+  Future<void> setUserIdentifier(String? userId) async {}
+}
+
+class _CustomKeylessCrashReporter implements AppCrashReporter {
+  @override
+  void log(String message) {}
+
+  @override
+  Future<void> recordError(
+    Object error,
+    StackTrace stackTrace, {
+    bool fatal = false,
+  }) async {}
 
   @override
   Future<void> setUserIdentifier(String? userId) async {}

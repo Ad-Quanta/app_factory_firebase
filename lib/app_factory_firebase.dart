@@ -24,6 +24,7 @@ export 'src/providers.dart'
         appScreenTrackingIssueSinkProvider,
         appTelemetryIdentityProvider,
         crashlyticsCollectionInitializerProvider,
+        crashlyticsGitShaInitializerProvider,
         crashlyticsInitializerProvider,
         firebasePerformanceDioInterceptorsProvider,
         goRouterScreenResolverProvider,

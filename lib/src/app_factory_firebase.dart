@@ -33,8 +33,16 @@ class AppFactoryFirebase {
     }
 
     bool crashlyticsCollectionEnabled = false;
+    bool crashlyticsGitShaAttached = false;
     bool flutterErrorsCaptured = false;
     if (firebaseInitialized && config.enableCrashlytics) {
+      crashlyticsGitShaAttached = await _runNonFatal(
+        'Crashlytics Git SHA initializer',
+        initializationErrors,
+        () => container.read(crashlyticsGitShaInitializerProvider.future),
+        fallback: false,
+      );
+
       flutterErrorsCaptured = await _runNonFatal(
         'Crashlytics Flutter error capture',
         initializationErrors,
@@ -87,6 +95,7 @@ class AppFactoryFirebase {
           crashlyticsCollectionEnabled: crashlyticsCollectionEnabled,
           performanceCollectionEnabled: performanceCollectionEnabled,
           flutterErrorsCaptured: flutterErrorsCaptured,
+          crashlyticsGitShaAttached: crashlyticsGitShaAttached,
           initializationErrors: initializationErrors,
         );
 

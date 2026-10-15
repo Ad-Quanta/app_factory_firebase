@@ -153,6 +153,28 @@ Future<bool> crashlyticsCollectionInitializer(Ref ref) async {
 }
 
 @Riverpod(keepAlive: true)
+Future<bool> crashlyticsGitShaInitializer(Ref ref) async {
+  final AppFactoryFirebaseConfig config = ref.watch(
+    appFactoryFirebaseConfigProvider,
+  );
+  if (!config.enableCrashlytics) {
+    return false;
+  }
+
+  final String? gitSha = config.resolvedGitSha;
+  if (gitSha == null) {
+    return false;
+  }
+
+  final AppCrashReporter crashReporter = ref.watch(appCrashReporterProvider);
+  if (crashReporter case final AppCrashCustomKeyWriter writer) {
+    await writer.setCustomKey(appFactoryFirebaseGitShaKey, gitSha);
+    return true;
+  }
+  return false;
+}
+
+@Riverpod(keepAlive: true)
 Future<bool> analyticsInitializer(Ref ref) async {
   final AppFactoryFirebaseConfig config = ref.watch(
     appFactoryFirebaseConfigProvider,

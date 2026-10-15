@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 
+const String appFactoryFirebaseGitShaKey = 'git_sha';
+
 abstract class AppCrashReporter {
   void log(String message);
 
@@ -15,7 +17,17 @@ abstract class AppCrashReporter {
   Future<void> setUserIdentifier(String? userId);
 }
 
-class FirebaseAppCrashReporter implements AppCrashReporter {
+/// Attaches searchable key-value pairs to crash reports.
+///
+/// This is separate from [AppCrashReporter] so reporters that cannot store
+/// custom keys stay valid implementations; callers must check for this type
+/// before writing keys.
+abstract class AppCrashCustomKeyWriter {
+  Future<void> setCustomKey(String key, Object value);
+}
+
+class FirebaseAppCrashReporter
+    implements AppCrashReporter, AppCrashCustomKeyWriter {
   FirebaseAppCrashReporter({FirebaseCrashlytics? crashlytics})
     : _crashlytics = crashlytics ?? FirebaseCrashlytics.instance;
 
@@ -38,6 +50,11 @@ class FirebaseAppCrashReporter implements AppCrashReporter {
   @override
   Future<void> setUserIdentifier(String? userId) {
     return _crashlytics.setUserIdentifier(userId ?? '');
+  }
+
+  @override
+  Future<void> setCustomKey(String key, Object value) {
+    return _crashlytics.setCustomKey(key, value);
   }
 }
 

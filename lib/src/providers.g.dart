@@ -835,6 +835,41 @@ final class CrashlyticsCollectionInitializerProvider
 String _$crashlyticsCollectionInitializerHash() =>
     r'c8e87e4be1f98cd5ac95c1a2f4520692a3a57062';
 
+@ProviderFor(crashlyticsGitShaInitializer)
+final crashlyticsGitShaInitializerProvider =
+    CrashlyticsGitShaInitializerProvider._();
+
+final class CrashlyticsGitShaInitializerProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
+    with $FutureModifier<bool>, $FutureProvider<bool> {
+  CrashlyticsGitShaInitializerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'crashlyticsGitShaInitializerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$crashlyticsGitShaInitializerHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<bool> create(Ref ref) {
+    return crashlyticsGitShaInitializer(ref);
+  }
+}
+
+String _$crashlyticsGitShaInitializerHash() =>
+    r'cd04b660e250e914012a948d61236d3eeaff6060';
+
 @ProviderFor(analyticsInitializer)
 final analyticsInitializerProvider = AnalyticsInitializerProvider._();
 
