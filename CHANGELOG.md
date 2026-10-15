@@ -1,3 +1,10 @@
+## 0.0.7
+
+- Fixed the startup Git SHA initializer permanently blocking app startup when
+  writing the Crashlytics custom key fails. Riverpod retries are now disabled
+  for this initializer, so write failures are recorded in
+  `initializationErrors` and startup continues fail-open.
+
 ## 0.0.6
 
 - Added build Git SHA attribution that reports the source commit as the
